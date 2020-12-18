@@ -1,0 +1,27 @@
+<div class="row mt-2">
+	<div class="col border d-flex justify-content-center pt-2 pb-2">
+		<webcam [allowCameraSwitch]="true" [imageQuality]="1"
+		  [switchCamera]="switchCamera" [trigger]="trigger" [mirrorImage]="'always'"
+		  (initError)="handleError($event)"
+		  (imageCapture)="handleImage($event)">
+		</webcam>
+	</div>
+</div>
+
+<div class="row mt-2">
+	<div class="col d-flex justify-content-between">
+		<button class="btn btn-lg btn-dark" (click)="back()">
+			<span style="margin-right: 5px !important;">Back</span>
+			<i class="fas fa-arrow-alt-circle-left"></i>
+		</button>
+		<button class="btn btn-lg btn-danger" (click)="triggerSnapshot()">
+			<span style="margin-right: 5px !important;">Capture</span>
+			<i class="fas fa-camera-retro"></i>
+		</button>
+		<button class="btn btn-lg btn-info" (click)="switchToNextCamera()">
+			<span style="margin-right: 5px !important;">Switch</span>
+			<i class="fas fa-sync"></i>
+		</button>
+	</div>
+</div>
+

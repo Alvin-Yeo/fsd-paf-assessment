@@ -1,0 +1,37 @@
+
+<div class="row mt-2">
+	<div class="col">
+		<h2>Share Something Today</h2>
+	</div>
+</div>
+
+<div class="row mt-2">
+	<div class="col d-flex justify-content-center">
+		<img class="border img-thumbnail" [src]="imagePath" alt="">
+	</div>
+</div>
+
+<form>
+	<div class="form-group">
+		<label for="title">Title</label>
+		<input id="title" class="form-control" type="text" placeholder="Title">
+	</div>
+	<div class="form-group">
+		<label for="comments">Comments</label>
+		<textarea id="comments"rows="5" class="form-control" placeholder="Your thoughts"></textarea>
+	</div>
+	<div class="d-flex justify-content-between mt-4">
+		<button class="btn btn-lg btn-primary">
+			<span style="margin-right: 5px !important;">Share</span>
+			<i class="fas fa-share-alt"></i>
+		</button>
+		<button class="btn btn-lg btn-warning" (click)="clear()">
+			<span style="margin-right: 5px !important;">Clear</span>
+			<i class="fas fa-trash-alt"></i>
+		</button>
+		<button class="btn btn-lg btn-danger" [routerLink]="['/', 'capture']">
+			<span style="margin-right: 5px !important;">Capture</span>
+			<i class="fas fa-camera-retro"></i>
+		</button>
+	</div>
+</form>

@@ -1,0 +1,29 @@
+
+<div class="row mt-2">
+	<div class="col">
+		<h2>Please Login</h2>
+	</div>
+</div>
+
+<form>
+	<div class="form-group">
+		<label for="title">Username</label>
+		<input id="title" class="form-control" type="text" placeholder="Username"
+				[ngClass]="{'is-invalid': errorMessage}">
+		<div class="invalid-feedback" *ngIf="errorMessage">
+			{{ errorMessage }}
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="password">Password</label>
+		<input type="password" id="password" class="form-control" placeholder="Password"
+				[ngClass]="{'is-invalid': errorMessage}">
+	</div>
+
+	<div class="d-flex justify-content-end align-items-center mt-4">
+		<button class="btn btn-lg btn-success">
+			<span style="margin-right: 5px !important;">Login</span>
+			<i class="fas fa-door-open"></i>
+		</button>
+	</div>
+</form>
