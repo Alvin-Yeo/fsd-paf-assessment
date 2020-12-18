@@ -1,1 +1,8 @@
-node_modules
+# environemnt_variables
+.env
+
+# node_modules
+node_modules/
+
+# TMP_DIR
+temp/

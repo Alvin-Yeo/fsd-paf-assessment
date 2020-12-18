@@ -5,11 +5,11 @@
 	</div>
 </div>
 
-<form>
+<form [formGroup]="loginForm">
 	<div class="form-group">
 		<label for="title">Username</label>
 		<input id="title" class="form-control" type="text" placeholder="Username"
-				[ngClass]="{'is-invalid': errorMessage}">
+				formControlName="username">
 		<div class="invalid-feedback" *ngIf="errorMessage">
 			{{ errorMessage }}
 		</div>
@@ -17,11 +17,12 @@
 	<div class="form-group">
 		<label for="password">Password</label>
 		<input type="password" id="password" class="form-control" placeholder="Password"
-				[ngClass]="{'is-invalid': errorMessage}">
+				formControlName="password">
 	</div>
 
 	<div class="d-flex justify-content-end align-items-center mt-4">
-		<button class="btn btn-lg btn-success">
+		<button class="btn btn-lg btn-success"
+				[disabled]="!loginForm.valid">
 			<span style="margin-right: 5px !important;">Login</span>
 			<i class="fas fa-door-open"></i>
 		</button>
