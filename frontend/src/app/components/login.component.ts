@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AuthenticationService } from '../authentication.service';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +15,9 @@ export class LoginComponent implements OnInit {
 	errorMessage = ''
 
 	constructor(
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private serv: AuthenticationService,
+    private router: Router
   ) {}
 
 	ngOnInit(): void { 
@@ -23,4 +27,15 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  async onLogin() {
+    const username = this.loginForm.get('username').value;
+    const password = this.loginForm.get('password').value;
+
+    const statusCode = await this.serv.authenticateUser({ username, password });
+
+    if(statusCode === 200)
+      this.router.navigate(['/main']);
+    else
+      this.errorMessage = 'Authentication failed. Please make sure the username and password are correct.';
+  }
 }

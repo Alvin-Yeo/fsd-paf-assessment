@@ -43,10 +43,10 @@ const mkQuery = (sql, pool) => {
 }
 
 // sql statements
-const SQL_GET_GAME_BY_ID = 'select name, year, url, image from game where gid = ?';
+const SQL_GET_USER = 'SELECT user_id, password FROM user WHERE user_id = ? AND password = ?';
 
 // sql functions
-const getGameById = mkQuery(SQL_GET_GAME_BY_ID, pool);
+const authenticateUser = mkQuery(SQL_GET_USER, pool);
 
 /* MongoDB */
 
@@ -120,6 +120,41 @@ app.use(morgan('combined'));
 
 // cors
 app.use(cors());
+
+// POST /authenticate
+app.post('/authenticate',
+	express.json(),
+	(req, res) => {
+		const username = req.body['username'];
+		const password = req.body['password'];
+
+		authenticateUser([ username, password ])
+			.then((result) => {
+				if(result.length > 0) {
+					console.info(`[INFO] Authentication successful.`);
+					res.status(200);
+					res.type('application/json');
+					res.json({ 
+						status: 200,
+						message: 'Authentication successful.'
+					});
+				} else {
+					console.info(`[INFO] Authentication failed. No user records are matched.`);
+					res.status(401);
+					res.type('application/json');
+					res.json({ message: 'Authentication failed. No user records are matched.' });
+				}
+			})
+			.catch((error) => {
+				console.error(`[ERROR] Failed to query user in database.`);
+				console.error(`[ERROR] Error message: `, error);
+
+				res.status(500);
+				res.type('application/json');
+				res.json({ error: error });
+			});
+	}
+);
 
 
 
