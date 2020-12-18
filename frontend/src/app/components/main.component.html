@@ -11,17 +11,17 @@
 	</div>
 </div>
 
-<form>
+<form [formGroup]="shareForm">
 	<div class="form-group">
 		<label for="title">Title</label>
-		<input id="title" class="form-control" type="text" placeholder="Title">
+		<input id="title" class="form-control" type="text" placeholder="Title" formControlName="title">
 	</div>
 	<div class="form-group">
 		<label for="comments">Comments</label>
-		<textarea id="comments"rows="5" class="form-control" placeholder="Your thoughts"></textarea>
+		<textarea id="comments"rows="5" class="form-control" placeholder="Your thoughts" formControlName="comments"></textarea>
 	</div>
 	<div class="d-flex justify-content-between mt-4">
-		<button class="btn btn-lg btn-primary">
+		<button class="btn btn-lg btn-primary" [disabled]="!shareForm.valid || !hasImage" (click)="onShare()">
 			<span style="margin-right: 5px !important;">Share</span>
 			<i class="fas fa-share-alt"></i>
 		</button>

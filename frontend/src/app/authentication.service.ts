@@ -4,6 +4,9 @@ import { Injectable } from "@angular/core";
 @Injectable()
 export class AuthenticationService {
 
+    username = '';
+    password = '';
+
     constructor(
         private http: HttpClient
     ) {}
@@ -19,5 +22,21 @@ export class AuthenticationService {
         }
 
         return statusCode;
+    }
+
+    getUsername() {
+        return this.username;
+    }
+
+    setUsername(username: string) {
+        this.username = username;
+    }
+
+    getPassword() {
+        return this.password;
+    }
+
+    setPassword(password: string) {
+        this.password = password;
     }
 }

@@ -7,6 +7,7 @@ const { MongoClient } = require('mongodb');
 const AWS = require('aws-sdk');
 const multer = require('multer');
 const fs = require('fs');
+const sha1 = require('sha1');
 
 // environment configuration
 require('dotenv').config();
@@ -52,8 +53,8 @@ const authenticateUser = mkQuery(SQL_GET_USER, pool);
 
 // connection string
 const MONGO_LOCALHOST = 'mongodb://localhost:27017';
-const MONGO_DATABASE = process.env.MONGO_DATABASE || '';
-const MONGO_COLLECTION = process.env.MONGO_COLLECTION || '';
+const MONGO_DATABASE = process.env.MONGO_DATABASE || 'share-app';
+const MONGO_COLLECTION = process.env.MONGO_COLLECTION || 'articles';
 
 // create connection pool with mongo client
 const mongoClient = new MongoClient(MONGO_LOCALHOST, {
@@ -78,6 +79,15 @@ const s3 = new AWS.S3({
 const upload = multer({
     dest: process.env.TMP_DIR || './temp'
 });
+
+const mkArticle = (params, s3Key) => {
+    return {
+        ts: new Date(),
+        title: params['title'],
+        comments: params['comments'],
+        image: s3Key
+    }
+}
 
 const readFile = (path) => {
     return new Promise((resolve, reject) => {
@@ -126,8 +136,8 @@ app.post('/authenticate',
 	express.json(),
 	(req, res) => {
 		const username = req.body['username'];
-		const password = req.body['password'];
-
+		const password = sha1(req.body['password']);
+	
 		authenticateUser([ username, password ])
 			.then((result) => {
 				if(result.length > 0) {
@@ -148,7 +158,7 @@ app.post('/authenticate',
 			.catch((error) => {
 				console.error(`[ERROR] Failed to query user in database.`);
 				console.error(`[ERROR] Error message: `, error);
-
+	
 				res.status(500);
 				res.type('application/json');
 				res.json({ error: error });
@@ -156,39 +166,70 @@ app.post('/authenticate',
 	}
 );
 
-
-
-// POST /upload
-app.post('/upload',
-    upload.single('file'),
+// POST /share
+app.post('/share',
+	upload.single('image'),
     (req, res) => {
-        readFile(req.file.path)
-            .then((buff) => {
+		const username = req.body['username'];
+		const password = sha1(req.body['password']);
+
+		const doc = mkArticle(req.body, req.file.filename);
+	
+		// authenticate user
+		authenticateUser([ username, password ])
+			.then((result) => {
+				if(result.length > 0) {
+					console.info(`[INFO] Authentication successful.`);
+				} else {
+					console.info(`[INFO] Authentication failed.`);
+					throw new Error('401');
+				}
+			})
+			// upload image and insert doc 
+			.then((result) => {
+				return readFile(req.file.path);
+			})
+			.then((buff) => {
                 return putObject(req.file, buff, s3);
+			})
+			.then((result) => {
+				console.info(`[INFO] Image was uploaded to S3 successfully.`);
+                return mongoClient.db(MONGO_DATABASE)
+                    .collection(MONGO_COLLECTION)
+                    .insertOne(doc);
             })
             .then((result) => {
-                console.info(`[INFO] Image was uploaded to S3 successfully.`);
+				console.info(`[INFO] Document was inserted to mongoDB successfully.`);
+
+				console.info(`[INFO] Removing temp file...`);
+				fs.unlink(req.file.path, () => {});
 
                 res.status(200);
                 res.type('application/json');
-                res.json({ status: 'OK' });
+                res.json({ 
+                    status: 200,
+                    insertedId: result['insertedId']
+                });
             })
-            .catch((error) => {
-                console.error(`[ERROR] Failed to insert document.`);
-                console.error(`[ERROR] Error message: `, error);
-
-                res.status(500);
-                res.type('application/json');
-                res.json({ error: error });
-            });
-        
-        // Remove file at TMP_DIR after response completed.
-        res.on('finish', () => {
-            fs.unlink(req.file.path, () => {});
-            console.info(`[INFO] Response ended. Removing temp file...`);
-        });
+			.catch((error) => {
+				console.error(`[ERROR] Failed to share article.`);
+				console.error(`[ERROR] Error message: `, error);
+				
+				if(error.message === '401') {
+					res.status(401);
+					res.type('application/json');
+					res.json({ error: 'Authentication failed.' });
+				} else {
+					res.status(500);
+					res.type('application/json');
+					res.json({ error: error });
+				}
+			});
     }
 );
+
+// serving angular app 
+app.use(express.static(__dirname + '/frontend'));
 
 /* Start Server */
 

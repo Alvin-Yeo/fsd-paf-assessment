@@ -1,6 +1,9 @@
 # environemnt_variables
 .env
 
+# Angular App
+frontend/
+
 # node_modules
 node_modules/
 

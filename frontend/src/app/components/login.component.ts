@@ -16,7 +16,7 @@ export class LoginComponent implements OnInit {
 
 	constructor(
     private fb: FormBuilder,
-    private serv: AuthenticationService,
+    private loginServ: AuthenticationService,
     private router: Router
   ) {}
 
@@ -31,11 +31,14 @@ export class LoginComponent implements OnInit {
     const username = this.loginForm.get('username').value;
     const password = this.loginForm.get('password').value;
 
-    const statusCode = await this.serv.authenticateUser({ username, password });
+    const statusCode = await this.loginServ.authenticateUser({ username, password });
 
-    if(statusCode === 200)
+    if(statusCode === 200) {
+      this.loginServ.setUsername(username);
+      this.loginServ.setPassword(password);
       this.router.navigate(['/main']);
-    else
+    } else {
       this.errorMessage = 'Authentication failed. Please make sure the username and password are correct.';
+    }
   }
 }
